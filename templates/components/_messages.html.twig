@@ -1,0 +1,23 @@
+{#
+{% for message in app.flashes('success') %}
+<div id="alertSuccess" class="alert alert-success mt-5">
+    {{ message }}
+    <a class="close" id="crossClose">x</a>
+
+</div>
+{% endfor %}
+
+{% for message in app.flashes('danger') %}
+<div id="alertDanger" class="alert alert-danger-purple">
+    {{ message | trans }}
+    <a class="close" id="crossClose">x</a>
+</div>
+{% endfor %}#}
+
+{% for key,type in app.flashes %}
+    {% for message in type %}
+        <div id="alertType" class="alert alert-{{ key }}">{{ message }}
+            <a class="close" id="crossClose">x</a>
+        </div>
+    {% endfor %}
+{% endfor %}

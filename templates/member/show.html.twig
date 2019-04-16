@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Member{% endblock %}
+
+{% block sub_body %}
+
+    <h1 class="text-center mb-3">{{ member.username }}</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ member.id }}</td>
+            </tr>
+            <tr>
+                <th>Firstname</th>
+                <td>{{ member.firstname }}</td>
+            </tr>
+            <tr>
+                <th>Lastname</th>
+                <td>{{ member.lastname }}</td>
+            </tr>
+            <tr>
+                <th>Username</th>
+                <td>{{ member.username }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ member.email }}</td>
+            </tr>
+            <tr>
+                <th>Password</th>
+                <td>{{ member.password }}</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+    <div class="memberFlex"><a class="btn btn-success" href="{{ path('member_index') }}">back to list</a>
+
+        <a class="btn btn-warning" href="{{ path('member_edit', {'id': member.id}) }}">edit</a></div>
+
+
+{% endblock sub_body %}

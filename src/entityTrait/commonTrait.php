@@ -4,6 +4,8 @@
 namespace App\entityTrait;
 
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 trait commonTrait
 {
     /**
@@ -15,26 +17,31 @@ trait commonTrait
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Vous devez entrez votre prénom")
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="vous devez entrer votre nom")
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="vous devez entrer votre pseudo")
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Vous devez entrer votre email")
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="vous devez entrez votre mot de passe")
      */
     private $password;
 
@@ -110,7 +117,7 @@ trait commonTrait
 
     public function getRoles(): ?array
     {
-        return $this->roles;
+        return $this->roles->toArray();
     }
 
     public function setRoles(array $roles): self
@@ -120,14 +127,10 @@ trait commonTrait
         return $this;
     }
 
-    public function addRole(string $role):bool
+    public function addRole($role)
     {
-        if(!in_array($role, $this->roles)){
-            $this->roles[] = $role;
-            return true;
-        }else{
-            return false;
-        }
+        $this->roles[] = $role;
+        return $this;
     }
 
 

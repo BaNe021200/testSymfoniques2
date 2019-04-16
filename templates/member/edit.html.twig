@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Member{% endblock %}
+
+{% block sub_body %}
+
+    <h1 class="text-center">Edit {{ member.username }}</h1>
+
+    {{ include('member/_form.html.twig', {'button_label': 'Update'}) }}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <div class="memberFlex mt-3"> <a class="btn btn-success" href="{{ path('member_index') }}">back to list</a>
+    {% endif %}
+
+   </div>
+{% endblock sub_body %}

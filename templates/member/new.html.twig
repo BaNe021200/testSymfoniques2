@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Member{% endblock %}
+
+{% block sub_body %}
+
+
+        <h1 class="text-center mt-5 mb-3">Create new Member</h1>
+
+
+        {% if not form.vars.valid %}
+            <div id="alertDanger" class="alert alert-danger">
+                Your form contains errors, all stared field are required
+                <a class="close" id="crossClose">x</a>
+            </div>
+        {% endif %}
+    {{ include('member/_form.html.twig') }}
+        <a class="btn btn-success float-right" href="{{ path('member_index') }}">back to list</a>
+{% endblock sub_body %}

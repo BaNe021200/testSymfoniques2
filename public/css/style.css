@@ -1,0 +1,11 @@
+legend.required:after, label.required:after {
+    content: "* ";
+    font-size: 1.5rem;
+    margin-left: 0.2rem;
+    color: #ffcb22;
+}
+
+.memberFlex{
+    display: flex;
+    justify-content: space-between;
+}

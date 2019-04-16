@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% include 'components/_messages.html.twig' %}
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    {{ form_start(form,{attr:{novalidate: 'novalidate'}}) }}
+
+    <div class="container">
+
+        {{ form_row(form.username) }}
+        {{ form_row(form.password) }}
+
+        <button type="submit" class="btn btn-primary">Soumettre</button>
+        {{ form_end(form) }}
+
+    </div>
+
+
+{% endblock %}
+
+{% block title %}
+
+{% endblock %}
+
