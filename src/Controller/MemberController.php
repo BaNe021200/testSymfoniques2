@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * @Route("/member")
@@ -35,7 +36,9 @@ class MemberController extends AbstractController
     public function new(Request $request): Response
     {
         $member = new Member();
-        $form = $this->createForm(MemberType::class, $member);
+        $form = $this->createForm(MemberType::class, $member,[
+            'validation_groups' => 'registration'
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -68,14 +71,23 @@ class MemberController extends AbstractController
      * @Route("/{id}/edit", name="member_edit", methods={"GET","POST"})
      * @param Request $request
      * @param Member $member
+     * @param UserPasswordEncoderInterface $encoder
      * @return Response
      */
-    public function edit(Request $request, Member $member): Response
+    public function edit(Request $request, Member $member, UserPasswordEncoderInterface $encoder): Response
     {
-        $form = $this->createForm(MemberType::class, $member);
+        $form = $this->createForm(MemberType::class, $member,[
+            'validation_groups' => ['Default']
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+
+            if($password = $form['password']->getData()){
+                $member->setPassword($encoder->encodePassword($member,$password));
+            }
+
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute('member_index', [

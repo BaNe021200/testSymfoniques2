@@ -17,31 +17,31 @@ trait commonTrait
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Vous devez entrez votre prénom")
+     * @Assert\NotBlank(message="Vous devez entrez votre prénom",groups={"registration"})
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="vous devez entrer votre nom")
+     * @Assert\NotBlank(message="vous devez entrer votre nom",groups={"registration"})
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="vous devez entrer votre pseudo")
+     * @Assert\NotBlank(message="vous devez entrer votre pseudo",groups={"registration"})
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Vous devez entrer votre email")
+     * @Assert\NotBlank(message="Vous devez entrer votre email",groups={"registration"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="vous devez entrez votre mot de passe")
+     * @Assert\NotBlank(message="vous devez entrez votre mot de passe",groups={"registration"})
      */
     private $password;
 
@@ -117,7 +117,7 @@ trait commonTrait
 
     public function getRoles(): ?array
     {
-        return $this->roles->toArray();
+        return $this->roles;
     }
 
     public function setRoles(array $roles): self
@@ -129,8 +129,20 @@ trait commonTrait
 
     public function addRole($role)
     {
-        $this->roles[] = $role;
-        return $this;
+        if(!in_array($role, $this->roles)){
+            $this->roles[] = $role;
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function removeRole(string $role)
+    {
+        $key = array_search($role, $this->roles);
+        if ($key !== false) {
+            unset($this->roles[$key]);
+        }
     }
 
 

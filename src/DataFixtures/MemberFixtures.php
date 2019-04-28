@@ -9,10 +9,10 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Faker\Factory;
-use Symfony\Component\DependencyInjection\Tests\Compiler\F;
 
 class MemberFixtures extends Fixture implements FixtureGroupInterface
 {
+
 
     /**
      * This method must return an array of groups

@@ -1,6 +1,7 @@
 security:
     encoders:
-        App\Entity\Member: plaintext
+        App\Entity\Member: bcrypt
+        App\Entity\Admin: bcrypt
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
@@ -9,6 +10,15 @@ security:
             entity:
                 class: App\Entity\Member
                 property: username
+
+        admin_provider:
+            entity:
+                class: App\Entity\Admin
+                property: username
+
+        chained_provider:
+            chain:
+                providers: [admin_provider, member_provider ]
 
     firewalls:
         dev:
@@ -36,7 +46,7 @@ security:
                 default_target_path: security.login
                 always_use_default_target_path: true
 
-            provider: member_provider
+            provider: chained_provider
 
             logout:
                 path: security.logout
