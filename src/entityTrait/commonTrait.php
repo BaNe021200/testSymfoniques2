@@ -4,6 +4,7 @@
 namespace App\entityTrait;
 
 
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 trait commonTrait
@@ -49,6 +50,12 @@ trait commonTrait
      * @ORM\Column(type="array")
      */
     private $roles = [];
+
+    /**
+     * @ORM\Column(type="string", length=16, nullable=true)
+     */
+    private $totp_key = null;
+
 
     public function getId(): ?int
     {
@@ -144,6 +151,28 @@ trait commonTrait
             unset($this->roles[$key]);
         }
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTotpKey()
+    {
+        return $this->totp_key;
+    }
+
+    /**
+     * @param mixed $totp_key
+     * @return commonTrait
+     */
+    public function setTotpKey($totp_key)
+    {
+        $this->totp_key = $totp_key;
+        return $this;
+    }
+
+
+
+
 
 
 }

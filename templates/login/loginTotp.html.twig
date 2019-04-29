@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="mt-5">Validation en 2 étapes activée</h1>
+        {% include 'components/_messages.html.twig' %}
+        <h3>Comme vous avez activé la validation en deux étapes veuillez entrer votre code</h3>
+        {{ form_start(form) }}
+
+        {{ form_row(form.code) }}
+
+        {{ form_row(form.totpNoMore) }}
+
+        {{ form_row(form.submit) }}
+
+        {{ form_end(form) }}
+        Vous pourrez tourjours revenir en arrière en supprimant les cookies dans votre navigateur
+    </div>
+{% endblock body %}
+
+{% block subtitle %}
+    login
+{% endblock subtitle %}
+

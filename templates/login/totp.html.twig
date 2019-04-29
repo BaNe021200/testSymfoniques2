@@ -1,0 +1,29 @@
+{% extends "base.html.twig" %}
+{#{% set form = totp_services.getForm().createView() %}#}
+
+
+
+
+{% block body %}
+    <div class="container">
+    <h1>Activer la validation en deux étapes</h1>
+    {% include 'components/_messages.html.twig' %}
+
+    <p class="text-center">
+        <img src="{{ qrcode }}" alt="">
+    </p>
+
+
+    {{ form_start(form) }}
+
+    <div class="row r">
+        <div class="col-md-6 text-cente">
+            {{ form_row(form.code) }}
+        </div>
+    </div>
+
+    {{ form_rest(form) }}
+
+    {{ form_end(form) }}
+
+{% endblock body %}

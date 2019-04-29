@@ -1,4 +1,7 @@
 {
+    "christian-riesen/otp": {
+        "version": "2.6.2"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -128,6 +131,9 @@
     },
     "ocramius/proxy-manager": {
         "version": "2.1.1"
+    },
+    "paragonie/constant_time_encoding": {
+        "version": "v2.2.3"
     },
     "phpdocumentor/reflection-common": {
         "version": "1.0.1"
