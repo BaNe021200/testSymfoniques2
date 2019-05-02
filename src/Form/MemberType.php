@@ -39,7 +39,7 @@ class MemberType extends AbstractType
             ])
             ->add('password',RepeatedType::class,
                 [
-
+                    'mapped' => false,
                     'type' => PasswordType::class,
                     'invalid_message' => 'The password fields must match.',
                     'options' => ['attr' => ['class' => 'password-field']],

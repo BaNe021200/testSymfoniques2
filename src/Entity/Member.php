@@ -10,8 +10,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\MemberRepository")
- * @UniqueEntity(fields={"username"},errorPath="username",message="ce pseudo existe déjà")
- * @UniqueEntity(fields={"email"},errorPath="email",message="cet email existe déjà")
+ * @UniqueEntity(fields={"username"},errorPath="username",message="ce pseudo existe déjà",groups={"registration"})
+ * @UniqueEntity(fields={"email"},errorPath="email",message="cet email existe déjà",groups={"registration"})
  */
 class Member implements UserInterface
 {
@@ -24,7 +24,7 @@ class Member implements UserInterface
      */
     public function __construct(string $role = 'ROLE_USER')
     {
-        $this->roles = new ArrayCollection();
+        //$this->roles = new ArrayCollection();
         $this->addRole($role);
     }
 

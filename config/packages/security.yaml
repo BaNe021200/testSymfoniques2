@@ -1,6 +1,7 @@
 security:
     encoders:
-        App\Entity\Member: plaintext
+        App\Entity\Member: bcrypt
+        App\Entity\Admin: bcrypt
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
@@ -10,6 +11,15 @@ security:
                 class: App\Entity\Member
                 property: username
 
+        admin_provider:
+            entity:
+                class: App\Entity\Admin
+                property: username
+
+        chained_provider:
+            chain:
+                providers: [admin_provider, member_provider ]
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -17,8 +27,13 @@ security:
         main:
             anonymous: true
 
-            # activate different ways to authenticate
+            #guard:
+            #    authenticators:
+            #        - App\Services\TotpLogin
 
+
+             #   entry_point: App\Controller\SecurityController::loginTotp
+            # activate different ways to authenticate
             # http_basic: true
             # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
 
@@ -36,7 +51,7 @@ security:
                 default_target_path: security.login
                 always_use_default_target_path: true
 
-            provider: member_provider
+            provider: chained_provider
 
             logout:
                 path: security.logout
@@ -45,5 +60,6 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+
         # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/member, roles: [ROLE_ADMIN,ROLE_USER] }

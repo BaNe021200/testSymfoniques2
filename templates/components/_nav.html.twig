@@ -15,6 +15,16 @@
 
     {% endif %}
     <ul class="nav navbar-nav ml-auto">
+
+       {# {% if is_granted('ROLE_USER') %}#}
+
+
+        {% if member.totpKey is null %}
+            <a class="dropdown-item alert alert-primary" href="{{ path('user.totp.up') }}">Activer la validation en deux étapes</a>
+        {% else %}
+            <a class="dropdown-item alert alert-danger-purple" href="{{ path('user.totp.down') }}">Désactiver la validation en deux étapes</a>
+        {% endif %} {#{% endif %}#}
+
         <li class="nav-item  "><a class="nav-link" href="{{ path('security.logout') }}">
                 <button class="btn btn-outline-danger">déconnexion</button>
             </a>
