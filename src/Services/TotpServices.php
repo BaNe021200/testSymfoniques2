@@ -73,6 +73,15 @@ class TotpServices
      * @var SessionInterface
      */
     private $session;
+    /**
+     * @var CookiesBundle
+     */
+    private $cookiesBundle;
+
+    /**
+     * @var Session
+     */
+    private $sessionFlash;
 
 
     /**
@@ -84,9 +93,9 @@ class TotpServices
      * @param Security $security
      * @param RequestStack $requestStack
      * @param SessionInterface $session
-     *
+     * @param CookiesBundle $cookiesBundle
      */
-    public function __construct(UrlGeneratorInterface $router, FormFactoryInterface $formFactory, ObjectManager $em, Environment $renderer, Security $security, RequestStack $requestStack, SessionInterface $session)
+    public function __construct(UrlGeneratorInterface $router, FormFactoryInterface $formFactory, ObjectManager $em, Environment $renderer, Security $security, RequestStack $requestStack, SessionInterface $session, CookiesBundle $cookiesBundle)
     {
 
         $this->em = $em;
@@ -110,6 +119,9 @@ class TotpServices
         $this->security = $security;
         $this->requestStack = $requestStack;
         $this->session = $session;
+        $this->cookiesBundle = $cookiesBundle;
+
+        $sessionFlash = new Session();
     }
 
     public function getForm()
@@ -126,20 +138,15 @@ class TotpServices
         $request = $this->requestStack->getCurrentRequest();
         $form = $this->getForm();
 
+
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
 
             $otp = new Otp();
+            $code = $form['code']->getData();
 
-            $data = $form->getData();
-
-            $datum = [];
-            foreach ($data as $k => $v) {
-                $datum[$k] = $v;
-            }
-
-            if ($otp->checkTotp(Encoding::base32DecodeUpper($this->session->get('secret')), $datum['code'])) {
+            if ($otp->checkTotp(Encoding::base32DecodeUpper($this->session->get('secret')), $code)) {
 
                 $user = $this->security->getUser();
                 $user->setTotpKey($this->session->get('secret'));
@@ -150,8 +157,24 @@ class TotpServices
 
                 $this->session->remove('secret');
 
+                /*if ($totpNoMore) {
+                    $this->cookiesBundle->createCookie('userKey', 'userKey');
+                    $sessionFlash->getFlashBag()->add('info','Vous avez coché l\'option ne plus demander d\'identifiaction à deux facteurs. Si vous souhaiter la retablir, supprimer le cookie \'userKey\' de votre navigateur');
+                }
+                else
+                {
+                    $getcookie = $this->cookiesBundle->getCookie('userKey');
+                    if($getcookie)
+                    {
+                        $this->cookiesBundle->destroyCookie('userKey');
+                    }
 
-                $sessionFlash->getFlashBag()->add('success', 'validation à deux étapes activée');
+                }*/
+                $totpNoMore = $form['totpNoMore']->getData();
+                $this->totpNoMore($totpNoMore);
+
+
+               $sessionFlash->getFlashBag()->add('success', 'validation à deux étapes activée');
                 return 'totpOk';
 
             } else {
@@ -163,64 +186,29 @@ class TotpServices
     }
 
 
-    /* public function userTotpLogin()
-     {
-         $session = new Session();
-         $request= $this->requestStack->getCurrentRequest();
-
-         $form = $this->getForm();
-         $form->handleRequest($request);
-
-         if ($form->isSubmitted() && $form->isValid()) {
-
-             # on récupére la clé du champ totpkey.
-
-             $user = $this->security->getUser()->getTotpKey();
-             $userTotpToken = uniqid('', true);
-             $otp = new Otp();
-             # on récupuère les données du formulaire : le code renvoyé par l'utlisateur et sa décision de créer ou non un cookie nommé userKey qui permet de ne plus avoir à rentrer de code.
-             $data = $form->getData();
-
-             $datum=[];
-             foreach ($data as $k => $v)
-             {
-                 $datum[$k] = $v;
-             }
-
-             # on vérifie la clé du champs et le code retourné coincident.
-             if ($otp->checkTotp(Encoding::base32DecodeUpper($user), $datum['code'])) {
-                 $this->session->start();
-                 #si l'utilisateur à coché alors un cookie est généré.
-                 if($datum['totpNoMore']==true)
-                 {
-                     setCookie('userKey', $userTotpToken, time() + 3600 * 24 * 365, '', '', false, true);
-                 }
-                 else{
-                     if(isset($_COOKIE['userKey']))
-                     {
-                         setcookie("userKey","", time()- 60);
-                     }
-
-                 }
-                 # si le binôme clé/code est valide alors l'utilisateur est connecté.
+    public function totpNoMore($totpNoMore)
+    {
 
 
-                 $session->getFlashBag()->add('success', 'Welcome back ' . $this->getUser()->getUsername() . ' ! :-)');
+        $sessionFlash = new Session();
+
+        if ($totpNoMore) {
+
+            $cookie = $this->cookiesBundle->createCookie('userKey', 'userKey');
+            $sessionFlash->getFlashBag()->add('info', 'Vous avez coché l\'option ne plus demander d\'identifiaction à deux facteurs. Si vous souhaiter la retablir, supprimer le cookie \'userKey\' de votre navigateur');
+            return $cookie;
+
+        } else {
 
 
-                 return 'totpLoginMatch';
-             } else {
-                 $session->getFlashBag()->add('danger', 'Code incorrect');
-                 return 'totpLoginFailed';
-             }
+            $getcookie = $this->cookiesBundle->getCookie('userKey');
+            if ($getcookie) {
 
+                $this->cookiesBundle->destroyCookie('userKey');
+            }
 
-         }
-
-         return $this->renderer->render('login/loginTotp.html.twig', [
-             'form' => $form->createView()
-         ]);
-     }*/
+        }
+    }
 
 
 }
