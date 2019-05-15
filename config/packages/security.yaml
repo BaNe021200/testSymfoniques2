@@ -24,13 +24,20 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        totp:
+            anonymous: true
+            pattern: ^/(security/entry|member/connected/success|totp)
+            guard:
+                authenticators:
+                    - App\Security\TotpAuthenticator
+            # TODO: trouver comment utiliser le provider ci-dessous        
+            provider: chained_provider
+            logout:
+                path: security.logout
         main:
             anonymous: true
-
-            #guard:
-            #    authenticators:
-            #        - App\Services\TotpLogin
-
+            #user_checker: App\Security\TotpUserChecker
 
              #   entry_point: App\Controller\SecurityController::loginTotp
             # activate different ways to authenticate
@@ -39,7 +46,6 @@ security:
 
             # form_login: true
             # https://symfony.com/doc/current/security/form_login_setup.html
-
 
             form_login:
                 login_path: security.login

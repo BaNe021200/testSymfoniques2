@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Member;
 use App\Form\MemberType;
+use App\Form\PrenomType;
 use App\Repository\MemberRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -123,10 +124,39 @@ class MemberController extends AbstractController
      */
     public function memberConnected(): Response
     {
-
-
         return $this->render('member/show.html.twig', [
             'member' => $this->getUser()
+        ]);
+    }
+
+    /**
+     * @return Response
+     * @Route("/change/prenom/", name="member.change.prenom")
+     */
+    public function changePrenom(Request $request): Response
+    {
+        $member = $this->getUser();
+        $form = $this->createForm(PrenomType::class, $member,[
+           // 'validation_groups' => ['Default']
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+/*
+            if($password = $form['password']->getData()){
+                $member->setPassword($encoder->encodePassword($member,$password));
+            }
+*/
+            //$this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('member_index', [
+                'id' => $member->getId(),
+            ]);
+        }
+
+        return $this->render('member/change_prenom.html.twig', [
+            'member' => $member,
+            'form' => $form->createView(),
         ]);
     }
 }

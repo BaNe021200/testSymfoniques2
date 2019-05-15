@@ -1,52 +1,58 @@
 <?php
 
-namespace Symfony\Component\HttpKernel\Tests;
+namespace App\tests\Controller;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
-use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
-use Symfony\Component\HttpKernel\Event\FilterControllerArgumentsEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\ControllerDoesNotReturnResponseException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\HttpKernel\HttpKernel;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Doctrine\Common\Persistence\ObjectManager;
 
-use Psr\Container\ContainerInterface;
 use App\Controller\FrontController;
+use App\Controller\SecurityController;
+use App\Kernel;
 
 class FrontControllerTest extends TestCase
 {
 
-    public function testIndex()
-    {
-        $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
-        $container->expects($this->once())
-            ->method('has')
-            ->will($this->returnValue(true));
+    private $container;
 
-        $controller = new FrontController();
-        $this->assertSame('', $controller->index());
+    public function setUp()
+    {
+        $kernel_test = new Kernel('test', true);
+        $kernel_test->boot();
+        $this->container = $kernel_test->getContainer();
     }
 
-    public function pas_testIndex()
+    public function testIndex()
     {
-        $kernel = $this->getHttpKernel(
-            new EventDispatcher(),
-            (new FrontController())->index
-        );
+        $controller = new FrontController();
+        $controller->setContainer($this->container);
+        $this->assertSame(200, $controller->index()->getStatusCode());
+    }
 
-        $response = $kernel->handle(new Request(), HttpKernelInterface::MASTER_REQUEST, true);
+    public function testLogin()
+    {
+        $session = new Session();
+        $controller = new SecurityController($session);
+        $controller->setContainer($this->container);
 
-        $this->assertSame('', $reponse);
+        $auth = $this->getMockBuilder(AuthenticationUtils::class)
+          ->disableOriginalConstructor()
+          ->getMock();
+
+        $manager = $this->getMockBuilder(ObjectManager::class)
+          ->disableOriginalConstructor()
+          ->getMock();
+
+        $request = $this->getMockBuilder(Request::class)
+          ->disableOriginalConstructor()
+          ->getMock();
+
+        $this->assertSame(200, $controller->login($auth, $manager, $request)->getStatusCode());
+        $this->assertSame('', $this->container->get('http_kernel'));
+        $this->assertSame('', $this->container->get('security.token_storage'));
+
     }
     /**
      * @expectedException \RuntimeException

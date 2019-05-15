@@ -5,6 +5,7 @@ namespace App\Controller;
 
 
 use App\Form\LoginType;
+use App\Form\EntryType;
 use App\Services\TotpLogin;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
  * Class SecurityController
@@ -27,12 +29,18 @@ class SecurityController extends AbstractController
     private $session;
 
     /**
+     * @var TokenInterface
+     */
+    private $token;
+
+    /**
      * SecurityController constructor.
      * @param SessionInterface $session
      */
-    public function __construct(SessionInterface $session)
+    public function __construct(SessionInterface $session, TokenStorageInterface $token)
     {
         $this->session = $session;
+        $this->token = $token;
     }
 
 
@@ -82,8 +90,6 @@ class SecurityController extends AbstractController
         $form = $this->createForm(LoginType::class, [
             'username' => $authenticationUtils->getLastUsername()
         ]);
-
-
 
 
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -137,7 +143,10 @@ class SecurityController extends AbstractController
      */
     public function validation()
     {
-
+        // Aucune des actions de cette route n'est exécuté.
+        // Mais elle est néanmoins récupérer par le guardhandler
+        die('ok');
+        dump('En passant par validate ?');
     }
 
     /**
@@ -146,5 +155,40 @@ class SecurityController extends AbstractController
     public function logout ()
     {
 
+    }
+
+    /**
+     * @Route("/entry", name="security.entry", methods={"GET", "POST"})
+     *
+     * @param AuthenticationUtils $authenticationUtils
+     * @param ObjectManager $manager
+     * @param Request $request
+     * @return RedirectResponse|Response
+     */
+    public function entry(AuthenticationUtils $authenticationUtils,
+                          ObjectManager $manager,
+                          Request $request)
+    {
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        $form = $this->createForm(EntryType::class, [
+            'username' => $lastUsername
+        ]);
+
+        $user = $this->token->getToken()->getUser();
+        if ($user)
+        {
+            /* TODO: initialiser le formulaire totp
+            $form = $this->createForm(TotpType::class, [
+                'username' => $lastUsername
+            ]);
+            */
+            dump($user);
+        }
+        return $this->render('login/login.html.twig', [
+            'form' => $form->createView(),
+            'last_username' => $lastUsername,
+            'error' => $authenticationUtils->getLastAuthenticationError()
+        ]);
     }
 }
