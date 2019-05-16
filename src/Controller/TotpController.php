@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 
+use App\Services\CookiesBundle;
 use App\Services\TotpServices;
 use Doctrine\Common\Persistence\ObjectManager;
 use Otp\GoogleAuthenticator;
@@ -68,9 +69,10 @@ class TotpController extends AbstractController
     /**
      * @Route("/totp/down",name="user.totp.down")
      * @param ObjectManager $manager
+     * @param CookiesBundle $cookiesBundle
      * @return RedirectResponse
      */
-    public function totpDown(ObjectManager $manager)
+    public function totpDown(ObjectManager $manager,CookiesBundle $cookiesBundle)
     {
         $this->session->start();
         $user = $this->getUser();
@@ -80,9 +82,12 @@ class TotpController extends AbstractController
         $manager->persist($user);
         $manager->flush();
 
-        //dd($_COOKIE);
+        $getCookie = $cookiesBundle->getCookie('userKey');
+        if($getCookie)
+        {
+            $cookiesBundle->destroyCookie('userKey');
+        }
 
-        setCookie("userKey","", time()- 60);
 
 
 

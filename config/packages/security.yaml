@@ -61,6 +61,8 @@ security:
 
             logout:
                 path: security.logout
+                success_handler: App\Services\LogoutSuccess
+
 
 
     # Easy way to control access for large sections of your site

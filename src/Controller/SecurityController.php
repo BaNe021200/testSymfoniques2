@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Form\LoginType;
 use App\Form\EntryType;
+use App\Services\CookiesBundle;
 use App\Services\TotpLogin;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -48,23 +49,21 @@ class SecurityController extends AbstractController
      * @param AuthenticationUtils $authenticationUtils
      * @param ObjectManager $manager
      * @param Request $request
+     * @param CookiesBundle $cookiesBundle
      * @return RedirectResponse
      */
-    public function login(AuthenticationUtils $authenticationUtils, ObjectManager $manager,Request $request)
+    public function login(AuthenticationUtils $authenticationUtils, ObjectManager $manager,Request $request,CookiesBundle $cookiesBundle)
     {
         if ($this->getUser())
         {
-            //dd($_COOKIE['userKey']);
-            //dd(isset($cookieUser));
+            $getCookie = $cookiesBundle->getCookie('userKey');
             # 1 on vérifie si un cookies est présent. si oui on connecte directement l'utilisateur
-            if (isset($_COOKIE['userKey'])) {
+            if ($getCookie) {
 
-                #$this->getUser()->addRole('ROLE_USER_CONNECTED');
-                #$manager->persist($this->getUser());
-                #$manager->flush();
+
                 $this->addFlash('success', 'Welcome back ' . $this->getUser()->getUsername() . ' ! :-)');
                 return $this->redirectToRoute('member.connected.success');
-            } else {
+            }
                 # s'il n'y pas de cookie on vérifie si l'utilisateur à activé la validation TOTP.
                 # validation à deux facteurs : si le champ TotpKey de la BDD est rempli la TOTP est activée.
                 #si la TOTP est activée on rentre l'utilisateur en session et on le redirige vers la route qui gère le totp
@@ -74,15 +73,12 @@ class SecurityController extends AbstractController
                     $this->session->set('userId', $this->getUser()->getId());
                     return $this->redirectToRoute('user.login.totp');
                 } else {
-                    /*$currentUser =$this->getUser();
-                    $currentUser->addRole('ROLE_USER_CONNECTED');
-                    $manager->persist($currentUser);
-                    $manager->flush();*/
+
                     $this->addFlash('success', 'Welcome back ' . $this->getUser()->getUsername() . ' ! :-)');
                     return $this->redirectToRoute('member.connected.success');
 
                 }
-            }
+
         }
 
 
@@ -125,8 +121,7 @@ class SecurityController extends AbstractController
         $totp = $totpLogin->userTotpLogin();
         $form = $totpLogin->getForm();
         if ($totp == 'totpLoginMatch') {
-            $this->session->set('userConnected', 'userconnected');
-            dump($this->session->get('userConnected'));
+
             return $this->redirectToRoute('member.connected.success');
         } elseif ($totp == 'totpLoginFailed') {
             $this->addFlash('danger', 'Code incorrect');

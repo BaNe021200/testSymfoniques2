@@ -68,6 +68,14 @@ class TotpLogin
      * @var TokenStorage
      */
     private $tokenStorage;
+    /**
+     * @var TotpServices
+     */
+    private $totpServices;
+    /**
+     * @var CookiesBundle
+     */
+    private $cookiesBundle;
 
 
     /**
@@ -80,8 +88,10 @@ class TotpLogin
      * @param RequestStack $requestStack
      * @param SessionInterface $session
      * @param TokenStorageInterface $tokenStorage
+     * @param TotpServices $totpServices
+     * @param CookiesBundle $cookiesBundle
      */
-    public function __construct(UrlGeneratorInterface $router, FormFactoryInterface $formFactory, ObjectManager $em, Environment $renderer, Security $security, RequestStack $requestStack, SessionInterface $session,TokenStorageInterface $tokenStorage)
+    public function __construct(UrlGeneratorInterface $router, FormFactoryInterface $formFactory, ObjectManager $em, Environment $renderer, Security $security, RequestStack $requestStack, SessionInterface $session, TokenStorageInterface $tokenStorage, TotpServices $totpServices, CookiesBundle $cookiesBundle)
     {
 
         $this->em = $em;
@@ -107,6 +117,9 @@ class TotpLogin
         $this->session = $session;
         $this->tokenStorage = $tokenStorage;
 
+
+        $this->totpServices = $totpServices;
+        $this->cookiesBundle = $cookiesBundle;
     }
 
     public function getForm()
@@ -133,50 +146,30 @@ class TotpLogin
             $data = $form->getData();
             $code = $form['code']->getData();
             $totpNoMore = $form['totpNoMore']->getData();
-            $request = new Request($_COOKIE);
-            $response = new Response('Content',
-                Response::HTTP_OK,
-                ['content-type' => 'text/html']);
+            //$getCookie = $this->cookiesBundle->getCookie('userKey');
 
-           dump($totpNoMore);
+
             # on vérifie la clé du champs et le code retourné coincident.
             if ($otp->checkTotp(Encoding::base32DecodeUpper($user), $code)) {
-                $this->session->start();
+
                 #si l'utilisateur à coché alors un cookie est généré.
-                if ($totpNoMore) {
 
-                    setCookie('userKey', $userTotpToken, time() + 3600 * 24 * 365, '', '', false, true);
-
+                $this->totpServices->totpNoMore($totpNoMore);
 
 
-
-
-
-
-                } else {
-                    //$cookieTotp = $this->security->getUser()->getTotpNoMore();
-                    //dd($cookieTotp);
-                    if (isset($_COOKIE['userKey'])) {
-                        setCookie("userKey","", time()- 60);
-                        /*$this->security->getUser()->setTotpNoMore(0);
-                        $this->em->persist($this->security->getUser());
-                        $this->em->flush();*/
-
-                    }
-
-                }
                 # si le binôme clé/code est valide alors l'utilisateur est connecté.
 
 
                 $session->getFlashBag()->add('success', 'Welcome back ' . $this->security->getUser()->getUsername() . ' ! :-)');
 
-
+                $addRole = $this->security->getUser()->addRole('ROLE_USER_CONNECTED');
+                $this->em->persist($this->security->getUser());
+                $this->em->flush();
 
                 /*$token = new UsernamePasswordToken($this->security->getUser(),null,'main',$this->security->getUser()->getRoles());
 
                 //$this->container->get('security.context')->setToken($token);
                 $this->tokenStorage->setToken($token);*/
-
 
 
                 return 'totpLoginMatch';
