@@ -37,10 +37,9 @@ class SecurityController extends AbstractController
      * SecurityController constructor.
      * @param SessionInterface $session
      */
-    public function __construct(SessionInterface $session, TokenStorageInterface $token)
+    public function __construct(SessionInterface $session)
     {
         $this->session = $session;
-        $this->token = $token;
     }
 
 
@@ -166,8 +165,7 @@ class SecurityController extends AbstractController
      * @return RedirectResponse|Response
      */
     public function entry(AuthenticationUtils $authenticationUtils,
-                          ObjectManager $manager,
-                          Request $request)
+                          TokenStorageInterface $token)
     {
         $lastUsername = $authenticationUtils->getLastUsername();
 
@@ -175,7 +173,7 @@ class SecurityController extends AbstractController
             'username' => $lastUsername
         ]);
 
-        $user = $this->token->getToken()->getUser();
+        $user = $token->getToken()->getUser();
         if ($user)
         {
             /* TODO: initialiser le formulaire totp
